@@ -78,13 +78,14 @@ public class PhoneController {
         }
 
         // Kiểm tra loại điện thoại
+        String status = null;
         if (type == 1) {
             System.out.print("Nhập thời gian bảo hành (tháng): ");
             int warrantyPeriod = 0;
             try {
                 warrantyPeriod = scanner.nextInt();
-                if (warrantyPeriod <= 0) {
-                    System.out.println("Thời gian bảo hành phải là số dương.");
+                if (warrantyPeriod <= 0 && warrantyPeriod > 730) {
+                    System.out.println("Thời gian bảo hành tối đa là 2 năm.");
                     return;
                 }
             } catch (Exception e) {
@@ -96,8 +97,8 @@ public class PhoneController {
 
             System.out.print("Nhập phạm vi bảo hành (trong nước/quốc tế): ");
             String warrantyScope = scanner.nextLine();
-            if (warrantyScope.trim().isEmpty()) {
-                System.out.println("Phạm vi bảo hành không được để trống!");
+            if (!status.equals("quốc tế") && !status.equals("trong nước")) {
+                System.out.println("Vui long nhập lại phạm vi bảo hành");
                 return;
             }
 
@@ -111,10 +112,10 @@ public class PhoneController {
                 return;
             }
 
-            System.out.print("Nhập trạng thái (đã kích hoạt/chưa kích hoạt): ");
-            String status = scanner.nextLine();
-            if (!status.equals("đã kích hoạt") && !status.equals("chưa kích hoạt")) {
-                System.out.println("Trạng thái không hợp lệ. Vui lòng nhập 'đã kích hoạt' hoặc 'chưa kích hoạt'.");
+            System.out.print("Nhập trạng thái (đã sửa chữa/chưa sửa chữa): ");
+            status = scanner.nextLine();
+            if (!status.equals("đã sửa chữa") && !status.equals("chưa sửa chữa")) {
+                System.out.println("Trạng thái không hợp lệ. Vui lòng nhập 'đã sửa chữa' hoặc 'chưa sửa chữa'.");
                 return;
             }
 
