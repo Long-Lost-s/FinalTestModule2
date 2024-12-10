@@ -3,6 +3,7 @@ package controller;
 import model.ImportedPhone;
 import model.OfficialPhone;
 import model.Phone;
+import utils.CVSUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,11 @@ import java.util.Scanner;
 public class PhoneController {
     private List<Phone> phoneList = new ArrayList<>();
 
-    // Thêm điện thoại mới
+    public PhoneController() {
+        this.phoneList = CVSUtils.readPhonesFromCSV(); // Load phones from CSV file on start
+    }
+
+    // Add phone from input
     public void addPhoneFromInput(Scanner scanner) {
         System.out.println("Chọn loại điện thoại:");
         System.out.println("1. Điện thoại chính hãng");
@@ -21,32 +26,108 @@ public class PhoneController {
 
         System.out.print("Nhập ID: ");
         String id = scanner.nextLine();
+        if (id.trim().isEmpty()) {
+            System.out.println("ID không được để trống!");
+            return;
+        }
+
         System.out.print("Nhập tên điện thoại: ");
         String name = scanner.nextLine();
+        if (name.trim().isEmpty()) {
+            System.out.println("Tên điện thoại không được để trống!");
+            return;
+        }
+        if (!name.matches("[A-Za-z0-9 ]+")) {
+            System.out.println("Tên điện thoại không hợp lệ! (Không chứa ký tự đặc biệt)");
+            return;
+        }
+
         System.out.print("Nhập giá bán: ");
-        double price = scanner.nextDouble();
+        double price = 0;
+        try {
+            price = scanner.nextDouble();
+            if (price <= 0) {
+                System.out.println("Giá bán phải là một số dương.");
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println("Giá bán không hợp lệ.");
+            scanner.nextLine();
+            return;
+        }
+
         System.out.print("Nhập số lượng: ");
-        int quantity = scanner.nextInt();
-        scanner.nextLine();
+        int quantity = 0;
+        try {
+            quantity = scanner.nextInt();
+            if (quantity <= 0) {
+                System.out.println("Số lượng phải là một số nguyên dương.");
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println("Số lượng không hợp lệ.");
+            scanner.nextLine(); // Clear invalid input
+            return;
+        }
+        scanner.nextLine(); // Clear buffer
+
         System.out.print("Nhập nhà sản xuất: ");
         String manufacturer = scanner.nextLine();
+        if (manufacturer.trim().isEmpty()) {
+            System.out.println("Nhà sản xuất không được để trống!");
+            return;
+        }
 
+        // Kiểm tra loại điện thoại
         if (type == 1) {
             System.out.print("Nhập thời gian bảo hành (tháng): ");
-            int warrantyPeriod = scanner.nextInt();
-            scanner.nextLine();
+            int warrantyPeriod = 0;
+            try {
+                warrantyPeriod = scanner.nextInt();
+                if (warrantyPeriod <= 0) {
+                    System.out.println("Thời gian bảo hành phải là số dương.");
+                    return;
+                }
+            } catch (Exception e) {
+                System.out.println("Thời gian bảo hành không hợp lệ.");
+                scanner.nextLine(); // Clear invalid input
+                return;
+            }
+            scanner.nextLine(); // Clear buffer
+
             System.out.print("Nhập phạm vi bảo hành (trong nước/quốc tế): ");
             String warrantyScope = scanner.nextLine();
+            if (warrantyScope.trim().isEmpty()) {
+                System.out.println("Phạm vi bảo hành không được để trống!");
+                return;
+            }
+
+            // Thêm điện thoại chính hãng vào danh sách
             phoneList.add(new OfficialPhone(id, name, price, quantity, manufacturer, warrantyPeriod, warrantyScope));
         } else if (type == 2) {
             System.out.print("Nhập quốc gia xách tay: ");
             String importedCountry = scanner.nextLine();
+            if (importedCountry.trim().isEmpty()) {
+                System.out.println("Quốc gia xách tay không được để trống!");
+                return;
+            }
+
             System.out.print("Nhập trạng thái (đã kích hoạt/chưa kích hoạt): ");
             String status = scanner.nextLine();
+            if (!status.equals("đã kích hoạt") && !status.equals("chưa kích hoạt")) {
+                System.out.println("Trạng thái không hợp lệ. Vui lòng nhập 'đã kích hoạt' hoặc 'chưa kích hoạt'.");
+                return;
+            }
+
+            // Thêm điện thoại xách tay vào danh sách
             phoneList.add(new ImportedPhone(id, name, price, quantity, manufacturer, importedCountry, status));
         } else {
             System.out.println("Loại điện thoại không hợp lệ!");
+            return;
         }
+
+        // Save updated phone list to CSV
+        CVSUtils.writePhonesToCSV(phoneList);
         System.out.println("Đã thêm điện thoại thành công!");
     }
 
@@ -61,6 +142,8 @@ public class PhoneController {
 
         if (phone != null) {
             phoneList.remove(phone);
+            // Save updated phone list to CSV
+            CVSUtils.writePhonesToCSV(phoneList);
             System.out.println("Đã xóa điện thoại thành công!");
         } else {
             System.out.println("Không tìm thấy điện thoại với ID: " + id);
