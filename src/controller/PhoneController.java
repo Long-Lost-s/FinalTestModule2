@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class PhoneController {
-    private List<Phone> phoneList = new ArrayList<>();
+    private List<Phone> phoneList;
 
     public PhoneController() {
         this.phoneList = CVSUtils.readPhonesFromCSV(); // Load phones from CSV file on start
@@ -24,12 +24,11 @@ public class PhoneController {
         int type = scanner.nextInt();
         scanner.nextLine();
 
-        System.out.print("Nhập ID: ");
-        String id = scanner.nextLine();
-        if (id.trim().isEmpty()) {
-            System.out.println("ID không được để trống!");
-            return;
-        }
+        String id = phoneList.isEmpty()
+                ? "1"
+                : String.valueOf(Integer.parseInt(phoneList.get(phoneList.size() - 1).getId()) + 1);
+
+        System.out.println("ID tự động gán cho điện thoại mới: " + id);
 
         System.out.print("Nhập tên điện thoại: ");
         String name = scanner.nextLine();
